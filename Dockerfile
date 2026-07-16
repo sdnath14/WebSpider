@@ -7,7 +7,7 @@ COPY frontend/ ./
 RUN npm run build
 
 # Stage 2: Create the Backend & Scraper Runtime
-FROM mcr.microsoft.com/playwright:v1.49.0-noble
+FROM mcr.microsoft.com/playwright:v1.61.1-noble
 WORKDIR /app
 
 # Copy backend configurations and install dependencies
