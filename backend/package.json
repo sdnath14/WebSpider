@@ -1,0 +1,29 @@
+{
+    "name": "web-spy-api",
+    "version": "1.0.0",
+    "description": "API service for the WebSpy frontend",
+    "main": "server.js",
+    "scripts": {
+        "start": "node server.js",
+        "dev": "node server.js",
+        "check": "node --check server.js"
+    },
+    "keywords": [
+        "web",
+        "scraper",
+        "api",
+        "cheerio"
+    ],
+    "author": "",
+    "license": "ISC",
+    "engines": {
+        "node": ">=20"
+    },
+    "dependencies": {
+        "axios": "^1.7.2",
+        "cheerio": "^1.2.0",
+        "ollama": "^0.6.3",
+        "playwright": "^1.61.1",
+        "turndown": "^7.2.4"
+    }
+}

@@ -1,0 +1,7 @@
+node_modules/
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+backend/scrapes/*.json
+!backend/scrapes/.gitkeep
+.DS_Store

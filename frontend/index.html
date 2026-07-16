@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Web Spy - Web Analysis Portal</title>
+    <link rel="stylesheet" href="style.css" />
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body data-mode="intel">
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="brand-logo" aria-hidden="true">
+                    <span style="font-size: 1.4rem; line-height: 1;">🕵️‍♂️</span>
+                </div>
+                <div>
+                    <p class="brand-eyebrow">INTELLIGENCE SUITE</p>
+                    <h1>WebSpy</h1>
+                </div>
+            </div>
+
+            <section class="sidebar-section">
+                <div class="section-heading">
+                    <span class="section-kicker">New analysis</span>
+                    <h3>Run a targeted search</h3>
+                </div>
+                <form id="scrapeForm">
+                    <div class="form-group">
+                        <label for="urlInput">Website URL</label>
+                        <input id="urlInput" type="text" placeholder="https://example.com" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="scrapeModeSelect">Search mode</label>
+                        <select id="scrapeModeSelect">
+                            <option value="intel" selected>Company Intel Mode</option>
+                            <option value="gst">GST Number Mode</option>
+                            <option value="ai-search">AI Search Mode</option>
+                        </select>
+                    </div>
+                    <div class="mode-switcher" aria-label="Quick mode selection">
+                        <button class="mode-choice active" type="button" data-mode-choice="intel">
+                            <span class="mode-choice-icon">🏢</span>
+                            <span><strong>Company</strong><small>Intel scan</small></span>
+                        </button>
+                        <button class="mode-choice" type="button" data-mode-choice="gst">
+                            <span class="mode-choice-icon">🔢</span>
+                            <span><strong>GST</strong><small>Verify ID</small></span>
+                        </button>
+                        <button class="mode-choice" type="button" data-mode-choice="ai-search">
+                            <span class="mode-choice-icon">🤖</span>
+                            <span><strong>AI Scan</strong><small>Extraction</small></span>
+                        </button>
+                    </div>
+                    <p id="modeHelper" class="mode-helper">Analyze company details, contact info, and tax/social signals.</p>
+                    <div class="form-group hidden" id="gstInputGroup">
+                        <label for="gstInput">GST Number (GSTIN)</label>
+                        <input id="gstInput" type="text" placeholder="e.g. 19AABCU9603R1ZV" />
+                    </div>
+                    <div class="form-group hidden" id="searchQueryGroup">
+                        <label for="searchQueryInput">Search Query</label>
+                        <textarea id="searchQueryInput" rows="2" placeholder="e.g. cafe near chinarpark" style="resize: vertical; font-family: inherit;"></textarea>
+                    </div>
+                    <div class="form-group hidden" id="extractSchemaGroup">
+                        <label for="extractSchemaInput">Data to Extract</label>
+                        <input id="extractSchemaInput" type="text" placeholder="e.g. Name, Price, Rating" value="Name, Price, Rating" />
+                    </div>
+                    <button class="btn-primary" id="scrapeBtn" type="submit">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                        <span id="scrapeBtnText">Run intel scan</span>
+                    </button>
+                </form>
+            </section>
+
+            <section class="sidebar-section history-section">
+                <div class="section-header">
+                    <h3>Recent reports</h3>
+                    <button class="btn-text" id="clearHistoryBtn" type="button">Clear</button>
+                </div>
+                <div id="historyList" class="history-list">
+                    <!-- History entries populated by JS -->
+                </div>
+            </section>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Welcome State -->
+            <div id="welcomeState" class="content-state">
+                <div class="welcome-box">
+                    <span class="welcome-kicker">WEB INTELLIGENCE, REFINED</span>
+                    <div class="welcome-icon-wrapper"><div class="welcome-icon">◈</div></div>
+                    <h2>Turn public data into a clear decision.</h2>
+                    <p>Choose a focused search mode to review a site, map company signals, or verify GST details in a polished, export-ready report.</p>
+                    <div class="quick-tips">
+                        <div class="tip-card">
+                            <span class="tip-number">01</span>
+                            <h4>Business intelligence</h4>
+                            <p>Contact, identity, tax and social signals in one report.</p>
+                        </div>
+                        <div class="tip-card">
+                            <span class="tip-number">02</span>
+                            <h4>GST verification</h4>
+                            <p>Taxpayer details presented in a verified-record layout.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loading State -->
+            <div id="loadingState" class="content-state hidden">
+                <div class="loader-box">
+                    <div class="spinner">
+                        <div class="spinner-ring"></div>
+                        <div class="spinner-ring"></div>
+                        <div class="spinner-ring"></div>
+                    </div>
+                    <span class="loading-kicker">PREPARING REPORT</span>
+                    <h3>Fetching Page Content</h3>
+                    <p>Requesting page structure through the backend service. This may take a few seconds...</p>
+                </div>
+            </div>
+
+            <!-- Error State -->
+            <div id="errorState" class="content-state hidden">
+                <div class="error-box">
+                    <div class="error-icon-wrapper">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                            <line x1="12" y1="9" x2="12" y2="13"></line>
+                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                        </svg>
+                    </div>
+                    <h2>Extraction Failed</h2>
+                    <p id="errorMessage">Unable to retrieve target website content.</p>
+                    <div class="error-actions">
+                        <button class="btn-primary" id="retryBtn" type="button">Retry Scrape</button>
+                        <button class="btn-secondary" id="switchProxyBtn" type="button">Try Again</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results Dashboard Panel -->
+            <div id="resultsPanel" class="results-panel hidden">
+                <div class="results-header">
+                    <div class="target-info">
+                        <span class="badge"><span class="badge-dot"></span><span id="resultStatus">Report ready</span></span>
+                        <h2 id="scrapedTitle">Page Title</h2>
+                        <a id="scrapedUrl" href="#" target="_blank" class="external-link">
+                            <span id="scrapedUrlText">https://example.com</span>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                                <polyline points="15 3 21 3 21 9"></polyline>
+                                <line x1="10" y1="14" x2="21" y2="3"></line>
+                            </svg>
+                        </a>
+                    </div>
+                    <div class="export-actions">
+                        <button class="btn-export" id="exportCsvBtn" type="button">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                            Export CSV
+                        </button>
+                        <button class="btn-export" id="exportTxtBtn" type="button">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                            Export TXT
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Metrics Grid -->
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-icon val-blue">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 16 14"></polyline>
+                            </svg>
+                        </div>
+                        <div class="metric-details">
+                            <span id="metricTimeLabel" class="metric-label">Response Time</span>
+                            <span id="metricTime" class="metric-value">0.00s</span>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon val-purple">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                            </svg>
+                        </div>
+                        <div class="metric-details">
+                            <span id="metricSizeLabel" class="metric-label">Page Size</span>
+                            <span id="metricSize" class="metric-value">0 KB</span>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon val-green">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                            </svg>
+                        </div>
+                        <div class="metric-details">
+                            <span id="metricLinksLabel" class="metric-label">Links Found</span>
+                            <span id="metricLinks" class="metric-value">0</span>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon val-pink">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                <polyline points="21 15 16 10 5 21"></polyline>
+                            </svg>
+                        </div>
+                        <div class="metric-details">
+                            <span id="metricImagesLabel" class="metric-label">Images Found</span>
+                            <span id="metricImages" class="metric-value">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dashboard Tabs Section -->
+                <div class="dashboard-body">
+                    <nav class="tabs-navigation">
+                        <button class="tab-btn active" data-tab="overview">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"></rect><rect x="14" y="3" width="7" height="5"></rect><rect x="14" y="12" width="7" height="9"></rect><rect x="3" y="16" width="7" height="5"></rect></svg>
+                            Overview
+                        </button>
+                        <button class="tab-btn" data-tab="headings" style="display: none;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="9" x2="20" y2="9"></line><line x1="4" y1="15" x2="20" y2="15"></line><line x1="10" y1="3" x2="8" y2="21"></line><line x1="16" y1="3" x2="14" y2="21"></line></svg>
+                            Headings
+                        </button>
+                        <button class="tab-btn" data-tab="links">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+                            Links (<span id="countLinksTab">0</span>)
+                        </button>
+                        <button class="tab-btn" data-tab="images" style="display: none;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                            Images (<span id="countImagesTab">0</span>)
+                        </button>
+
+                        <button class="tab-btn" data-tab="json">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+                            Raw JSON
+                        </button>
+                    </nav>
+
+                    <div class="tabs-container">
+                        <!-- Overview Tab -->
+                        <div id="tab-overview" class="tab-panel active">
+                            <div class="info-block">
+                                <h3>Page Metadata</h3>
+                                <table class="meta-table">
+                                    <tbody>
+                                        <tr>
+                                            <th>Title</th>
+                                            <td id="metaTitle">No title found.</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Description</th>
+                                            <td id="metaDesc">No description found.</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Keywords</th>
+                                            <td id="metaKeywords">No keywords specified.</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="info-block">
+                                <h3>OpenGraph & Social Properties</h3>
+                                <div id="ogContainer" class="og-grid">
+                                    <!-- OG Cards populated by JS -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Headings Outline Tab -->
+                        <div id="tab-headings" class="tab-panel">
+                            <div class="tab-panel-header">
+                                <h3>Header Hierarchy Outline</h3>
+                                <span class="tab-hint">Outline showing headings H1 to H6.</span>
+                            </div>
+                            <div id="headingsOutline" class="headings-outline">
+                                <!-- Headings populated by JS -->
+                            </div>
+                        </div>
+
+                        <!-- Links Tab -->
+                        <div id="tab-links" class="tab-panel">
+                            <div class="tab-panel-header">
+                                <h3>Extracted Links</h3>
+                                <input id="linkSearch" type="search" placeholder="Search links..." class="search-input" />
+                            </div>
+                            <div class="table-container">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Text Label</th>
+                                            <th>Absolute Destination URL</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="linksTableBody">
+                                        <!-- Populated by JS -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Images Tab -->
+                        <div id="tab-images" class="tab-panel">
+                            <div class="tab-panel-header">
+                                <h3>Media Assets</h3>
+                                <input id="imageSearch" type="search" placeholder="Search image text..." class="search-input" />
+                            </div>
+                            <div id="imagesGallery" class="images-gallery">
+                                <!-- Populated by JS -->
+                            </div>
+                        </div>
+
+
+
+                        <!-- Raw JSON Tab -->
+                        <div id="tab-json" class="tab-panel">
+                            <div class="tab-panel-header">
+                                <h3>Data Analytics & Raw Output</h3>
+                                <div style="display: flex; gap: 8px;">
+                                    <button class="btn-secondary" id="copyJsonBtn" type="button">Copy JSON</button>
+                                    <button class="btn-secondary" id="exportJsonBtn" type="button">Download JSON</button>
+                                </div>
+                            </div>
+                            <div class="json-tab-layout">
+                                <div class="json-analytics-panel" id="jsonAnalyticsPanel">
+                                    <h4>Entity Distribution</h4>
+                                    <div class="analytics-card">
+                                        <div id="analyticsChart" class="chart-canvas"></div>
+                                        <div id="analyticsLegend" class="chart-legend"></div>
+                                    </div>
+                                </div>
+                                <div class="raw-json-container">
+                                    <pre><code id="rawJsonCode">{}</code></pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Floating Chatbot Widget -->
+    <div class="chatbot-container closed" id="chatbotWidget">
+        <button class="chatbot-trigger" id="chatbotTrigger" aria-label="Open AI Assistant">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+            <span class="chatbot-pulse"></span>
+        </button>
+
+        <div class="chatbot-window">
+            <div class="chatbot-header">
+                <div class="chatbot-header-title">
+                    <span class="chat-avatar-icon">🤖</span>
+                    <div>
+                        <h4>AuraScrape AI</h4>
+                        <span class="chat-status"><span class="status-dot"></span> AI service</span>
+                    </div>
+                </div>
+                <button class="btn-close-chat" id="closeChatBtn" aria-label="Close Chat">&times;</button>
+            </div>
+            <div class="chatbot-messages" id="chatbotMessages">
+                <div class="chat-message assistant">
+                    Hi! I can help with the app and answer questions about the currently scraped page details.
+                </div>
+            </div>
+            <form class="chatbot-input-area" id="chatbotInputForm">
+                <input type="text" id="chatbotInput" placeholder="Ask a question about the page..." autocomplete="off" required />
+                <button type="submit" class="btn-send-chat" id="sendChatBtn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="22" y1="2" x2="11" y2="13"></line>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- App Script -->
+    <script type="module" src="/app.js"></script>
+</body>
+</html>

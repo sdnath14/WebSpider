@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: web-spy-api
+    runtime: node
+    rootDir: backend
+    buildCommand: npm ci && npx playwright install --with-deps chromium
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: 20.19.0
+      - key: ALLOWED_ORIGINS
+        sync: false
+      - key: OLLAMA_HOST
+        sync: false
+      - key: SCRAPES_DIR
+        sync: false
