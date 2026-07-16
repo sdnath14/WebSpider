@@ -2,16 +2,7 @@
    Web Spy Application Logic
    ========================================================================== */
 
-const configuredApiBaseUrl = (import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:3000' : ''))
-    .trim()
-    .replace(/\/+$/, '');
-
-function apiUrl(path) {
-    if (!configuredApiBaseUrl) {
-        throw new Error('The API URL is not configured. Set VITE_API_URL in the Vercel project settings.');
-    }
-    return `${configuredApiBaseUrl}${path}`;
-}
+const API_BASE_URL = "https://webspider-wa6m.onrender.com";
 
 document.addEventListener('DOMContentLoaded', () => {
     // DOM Elements - Form & Controls
@@ -201,7 +192,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             urlInput.value = targetUrl; // update in UI
 
-            const response = await fetch(apiUrl('/api/scrape'), {
+            const response = await fetch(`${API_BASE_URL}/api/scrape`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -1288,7 +1279,7 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         try {
-            const response = await fetch(apiUrl('/api/save'), {
+            const response = await fetch(`${API_BASE_URL}/api/save`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -1327,7 +1318,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             urlInput.value = targetUrl;
 
-            const response = await fetch(apiUrl('/api/scrape-ai'), {
+            const response = await fetch(`${API_BASE_URL}/api/scrape-ai`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -1382,7 +1373,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (loadingText) loadingText.textContent = `Running headless browser to fetch business details for: ${gstin}. This may take 8 to 15 seconds...`;
 
         try {
-            const response = await fetch(apiUrl('/api/scrape-gst'), {
+            const response = await fetch(`${API_BASE_URL}/api/scrape-gst`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -1432,7 +1423,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (loadingText) loadingText.textContent = `Crawling ${url} and its contact/about pages to extract phone numbers, emails, GST numbers, social profiles, and business details. This may take 15-30 seconds...`;
 
         try {
-            const response = await fetch(apiUrl('/api/scrape-intel'), {
+            const response = await fetch(`${API_BASE_URL}/api/scrape-intel`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -1747,7 +1738,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     };
                 }
 
-                const response = await fetch(apiUrl('/api/chat'), {
+                const response = await fetch(`${API_BASE_URL}/api/chat`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'

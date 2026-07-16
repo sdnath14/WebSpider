@@ -865,8 +865,33 @@ Requested fields to extract: ${schema || 'Name, Price, Rating'}`;
     });
     return;
   }
+  // Serve static files from 'public' folder
+  let reqPath = req.url === '/' ? '/index.html' : req.url;
+  const safePath = path.normalize(reqPath).replace(/^(\.\.[\/\\])+/, '');
+  const filePath = path.join(__dirname, 'public', safePath);
 
-  return sendJson(res, 404, { success: false, error: 'API route not found.' });
+  fs.stat(filePath, (err, stats) => {
+    if (!err && stats.isFile()) {
+      const mimeTypes = {
+        '.html': 'text/html',
+        '.css': 'text/css',
+        '.js': 'text/javascript',
+        '.png': 'image/png',
+        '.jpg': 'image/jpeg',
+        '.gif': 'image/gif',
+        '.svg': 'image/svg+xml',
+        '.json': 'application/json',
+        '.ico': 'image/x-icon'
+      };
+      const ext = path.extname(filePath).toLowerCase();
+      const contentType = mimeTypes[ext] || 'application/octet-stream';
+      
+      res.writeHead(200, { 'Content-Type': contentType });
+      fs.createReadStream(filePath).pipe(res);
+    } else {
+      sendJson(res, 404, { success: false, error: 'API route or file not found.' });
+    }
+  });
 });
 
 server.listen(port, () => {
